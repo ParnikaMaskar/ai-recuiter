@@ -71,13 +71,15 @@ useEffect(() => {
 }, [messages, callStatus, type, userId]);
 
   const handleCall = async () => {
-    setCallStatus(CallStatus.CONNECTING);
-    await vapi.start(process.env.NEXT_PUBLIC_VAPI_API_KEY!, {
-      variableValues:{
+        setCallStatus(CallStatus.CONNECTING);
+        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN!, {
+        workflowId: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
+        variableValues: {
         username: userName,
         userId: userId,
-      }
-    })
+      },
+    } as any);
+
   }
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
