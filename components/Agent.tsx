@@ -66,9 +66,9 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
 
   }, []);
 
-  useEffect(() => {
-    if (callStatus === CallStatus.FINISHED) router.push('/');
-  }, [messages, callStatus,type,userId]);
+useEffect(() => {
+  if (callStatus === CallStatus.FINISHED) router.push('/');
+}, [messages, callStatus, type, userId]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -84,7 +84,7 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     vapi.stop();
   }
 
-  const latestMessage = messages[messages.length - 1].content;
+  const latestMessage = messages[messages.length - 1]?.content;
   const iscallInactiveorFinished = callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
 
