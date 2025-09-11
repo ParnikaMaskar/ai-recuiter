@@ -71,16 +71,36 @@ useEffect(() => {
 }, [messages, callStatus, type, userId]);
 
   const handleCall = async () => {
-        setCallStatus(CallStatus.CONNECTING);
-        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN!, {
-        workflowId: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
-        variableValues: {
-        username: userName,
-        userId: userId,
-      },
-    } as any);
+    setCallStatus(CallStatus.CONNECTING);
 
-  }
+    if (type === "generate") {
+      await vapi.start(
+        undefined,
+        undefined,
+        undefined,
+        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
+        {
+          variableValues: {
+            username: userName,
+            userid: userId,
+          },
+        }
+      );
+    } else {
+      let formattedQuestions = "";
+      if (questions) {
+        formattedQuestions = questions
+          .map((question) => `- ${question}`)
+          .join("\n");
+      }
+
+      await vapi.start(interviewer, {
+        variableValues: {
+          questions: formattedQuestions,
+        },
+      });
+    }
+  };
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
     vapi.stop();
