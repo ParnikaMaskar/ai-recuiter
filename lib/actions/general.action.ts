@@ -34,8 +34,9 @@ export async function createFeedback(params: CreateFeedbackParams) {
         `,
       system:
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
-    });
-
+       
+      });
+      console.log("Generated feedback:", object);
     const feedback = {
       interviewId: interviewId,
       userId: userId,
@@ -56,6 +57,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
     }
 
     await feedbackRef.set(feedback);
+    console.log("Saving feedback:", feedback);
+
 
     return { success: true, feedbackId: feedbackRef.id };
   } catch (error) {
