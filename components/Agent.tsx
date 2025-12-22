@@ -61,7 +61,6 @@ const Agent = ({
         ) {
           setTimeout(() => {
             vapi.stop(); // triggers call-end internally
-            setCallStatus(CallStatus.FINISHED);
           }, 1500);
         }
       }
