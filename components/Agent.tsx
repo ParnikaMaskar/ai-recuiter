@@ -47,10 +47,26 @@ const Agent = ({
 
     const onMessage = (message: Message) => {
       if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
+        const newMessage = {
+          role: message.role,
+          content: message.transcript,
+        };
+
         setMessages((prev) => [...prev, newMessage]);
+
+        // 🔴 FORCE AUTO-END AFTER FINAL ASSISTANT MESSAGE
+        if (
+          message.role === "assistant" &&
+          message.transcript.toLowerCase().includes("thank")
+        ) {
+          setTimeout(() => {
+            vapi.stop(); // triggers call-end internally
+            setCallStatus(CallStatus.FINISHED);
+          }, 1500);
+        }
       }
     };
+
 
     const onSpeechStart = () => {
       console.log("speech start");
@@ -226,5 +242,7 @@ const Agent = ({
     </>
   );
 };
+
+
 
 export default Agent;
