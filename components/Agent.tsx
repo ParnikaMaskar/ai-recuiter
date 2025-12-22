@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -35,6 +35,9 @@ const Agent = ({
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastMessage, setLastMessage] = useState<string>("");
+  const hasGeneratedFeedback = useRef(false);
+
+
 
   useEffect(() => {
     const onCallStart = () => {
@@ -105,6 +108,27 @@ const Agent = ({
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
       console.log("handleGenerateFeedback");
+      console.log("FEEDBACK PAYLOAD", {
+        interviewId,
+        userId,
+        messagesCount: messages.length,
+        messages,
+      });
+
+      useEffect(() => {
+  if (
+    callStatus === CallStatus.FINISHED &&
+    !hasGeneratedFeedback.current
+  ) {
+    hasGeneratedFeedback.current = true;
+
+    if (type === "generate") {
+      router.push("/");
+    } else {
+      handleGenerateFeedback(messages);
+    }
+  }
+}, [callStatus]);
 
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
