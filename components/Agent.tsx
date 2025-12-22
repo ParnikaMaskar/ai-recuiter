@@ -57,7 +57,7 @@ const Agent = ({
         // 🔴 FORCE AUTO-END AFTER FINAL ASSISTANT MESSAGE
         if (
           message.role === "assistant" &&
-          message.transcript.toLowerCase().includes("thank")
+          message.transcript.toLowerCase().includes("have a great day")
         ) {
           setTimeout(() => {
             vapi.stop(); // triggers call-end internally
