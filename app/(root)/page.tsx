@@ -10,17 +10,17 @@ import {
   getFeedbackByInterviewId,
 } from '@/lib/actions/general.action'
 
-const page = async () => {
-  const user = await getCurrentUser();
-  if (!user) return null;
+const Page = async () => {
+  const user = await getCurrentUser()
+  if (!user) return null
 
   const [userInterviews, latestInterviews] = await Promise.all([
     getInterviewsByUserId(user.id),
     getLatestInterviews({ userId: user.id, limit: 20 }),
-  ]);
+  ])
 
-  const hasPastInterviews = (userInterviews?.length ?? 0) > 0;
-  const hasUpcomingInterviews = (latestInterviews?.length ?? 0) > 0;
+  const hasPastInterviews = (userInterviews?.length ?? 0) > 0
+  const hasUpcomingInterviews = (latestInterviews?.length ?? 0) > 0
 
   // ✅ Resolve async work BEFORE JSX
   const userInterviewCards = hasPastInterviews
@@ -29,7 +29,7 @@ const page = async () => {
           const feedback = await getFeedbackByInterviewId({
             interviewId: interview.id,
             userId: interview.userId,
-          });
+          })
 
           return (
             <InterviewCard
@@ -37,10 +37,10 @@ const page = async () => {
               {...interview}
               feedback={feedback}
             />
-          );
+          )
         })
       )
-    : null;
+    : []
 
   const latestInterviewCards = hasUpcomingInterviews
     ? await Promise.all(
@@ -48,7 +48,7 @@ const page = async () => {
           const feedback = await getFeedbackByInterviewId({
             interviewId: interview.id,
             userId: interview.userId,
-          });
+          })
 
           return (
             <InterviewCard
@@ -56,10 +56,10 @@ const page = async () => {
               {...interview}
               feedback={feedback}
             />
-          );
+          )
         })
       )
-    : null;
+    : []
 
   return (
     <>
@@ -89,7 +89,7 @@ const page = async () => {
       <section className="flex flex-col gap-6 mt-8">
         <h2>Your Interviews</h2>
         <div className="interviews-section">
-          {hasPastInterviews ? (
+          {userInterviewCards.length > 0 ? (
             userInterviewCards
           ) : (
             <p>You haven't conducted any interviews yet</p>
@@ -101,7 +101,7 @@ const page = async () => {
       <section className="flex flex-col gap-6 mt-8">
         <h2>Take an Interview</h2>
         <div className="interviews-section">
-          {hasUpcomingInterviews ? (
+          {latestInterviewCards.length > 0 ? (
             latestInterviewCards
           ) : (
             <p>There are no other interviews available</p>
@@ -109,7 +109,7 @@ const page = async () => {
         </div>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default page;
+export default Page
