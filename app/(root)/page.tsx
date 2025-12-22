@@ -5,6 +5,7 @@ import Link from 'next/link'
 import React from 'react'
 import { getCurrentUser } from '@/lib/actions/auth.action'
 import { getInterviewsByUserId, getLatestInterviews } from '@/lib/actions/general.action'
+import { getFeedbackByInterviewId } from '@/lib/actions/general.action'
 
 
 const page = async () => {
@@ -41,9 +42,22 @@ const page = async () => {
         <h2>Your Interviews</h2>
         <div className='interviews-section'>
           {hasPastInterviews ? (
-            userInterviews?.map((interview) => (
-              <InterviewCard {...interview} key={interview.id} />
-            ))
+            await Promise.all(
+              userInterviews!.map(async (interview) => {
+                const feedback = await getFeedbackByInterviewId({
+                  interviewId: interview.id,
+                  userId: interview.userId,
+                });
+
+                return (
+                  <InterviewCard
+                    key={interview.id}
+                    {...interview}
+                    feedback={feedback}   // ✅ PASS IT
+                  />
+                );
+              })
+            )
           ) : (
             <p>You haven't conducted any interviews yet</p>
           )}
@@ -54,14 +68,28 @@ const page = async () => {
         <h2>Take an Interview</h2>
         <div className='interviews-section'>
           {hasUpcomingInterviews ? (
-            (latestInterviews ?? []).map((interview) => (
-              <InterviewCard {...interview} key={interview.id} />
-            ))
+            await Promise.all(
+              latestInterviews!.map(async (interview) => {
+                const feedback = await getFeedbackByInterviewId({
+                  interviewId: interview.id,
+                  userId: interview.userId,
+                });
+
+                return (
+                  <InterviewCard
+                    key={interview.id}
+                    {...interview}
+                    feedback={feedback}
+                  />
+                );
+              })
+            )
           ) : (
-            <p>There are no other interviews available </p>
+            <p>There are no other interviews available</p>
           )}
         </div>
       </section>
+
 
     </>
   )
