@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PrepWise (AI Interview Practice)
 
-## Getting Started
+An AI-powered mock interview web app built with **Next.js (App Router)**. Users can:
+- Create job interview practice sessions (role, level, tech stack, question focus)
+- Take interviews using **Vapi** voice workflows
+- Get structured **AI feedback** (scores, strengths, and improvement areas) powered by **Gemini**
+- Sign up / sign in using **Firebase Auth** and store interview + feedback data in **Firestore**
 
-First, run the development server:
+---
+
+## Features
+
+- **Authenticated dashboard** (interviews created by you + other available interviews)
+- **Interview generation** via `/api/vapi/generate` (Gemini generates questions)
+- **Voice interview** via Vapi workflows
+- **Auto-feedback generation** after the call ends
+- **Feedback breakdown page** with per-category scores and comments
+
+---
+
+## Tech Stack
+
+- Next.js 15 + React 19 (TypeScript)
+- Tailwind CSS (with shadcn/ui-style components)
+- Firebase Admin / Firestore
+- Firebase Auth (client-side)
+- Vapi Web SDK for voice calls
+- AI SDK + Gemini model (`gemini-2.0-flash-001`)
+
+---
+
+## Prerequisites
+
+- Node.js (version compatible with your Next.js setup)
+- A Firebase project with:
+  - Firestore enabled
+  - Firebase Auth enabled
+  - Service account credentials for Admin SDK
+- Vapi account + a workflow ID configured for your interview
+- Gemini access via the AI SDK (handled by environment variables)
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the project root with the following variables.
+
+### Firebase (Admin)
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY` (use the escaped `\n` format if copying from the JSON)
+
+### Vapi (Web)
+- `NEXT_PUBLIC_VAPI_WEB_TOKEN`
+- `NEXT_PUBLIC_VAPI_WORKFLOW_ID`
+
+> The app uses `NEXT_PUBLIC_VAPI_*` in client components, so these must be present.
+
+---
+
+## Installation
+
+```bash
+npm install
+```
+
+---
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
+- http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Routes / Key Pages
 
-## Learn More
+- `/` — Dashboard (shows your interviews + other available interviews)
+- `/interview` — Interview generation / start page
+- `/interview/[id]` — Voice interview page (Vapi)
+- `/interview/[id]/feedback` — AI feedback breakdown
+- `/sign-in` and `/sign-up` — Auth pages
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How It Works (High-level)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Generate questions**: `POST /api/vapi/generate` calls Gemini to create a JSON array of questions and stores a finalized interview in Firestore.
+2. **Start voice call**: `components/Agent.tsx` starts a Vapi workflow.
+3. **Collect transcript**: the client listens for Vapi transcript messages (final) and stores them locally.
+4. **Generate feedback**: after the call ends, `createFeedback` uses Gemini + a Zod schema (`feedbackSchema`) to produce:
+   - overall score
+   - category scores
+   - strengths
+   - areas for improvement
+5. **Persist**: feedback is saved in the `feedback` Firestore collection.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Firestore Collections (inferred)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `users`
+  - `name`, `email`
+- `interviews`
+  - `role`, `type`, `level`, `techstack[]`, `questions[]`, `userId`, `finalized`, `coverImage`, `createdAt`
+- `feedback`
+  - `interviewId`, `userId`, `totalScore`, `categoryScores`, `strengths`, `areasForImprovement`, `finalAssessment`, `createdAt`
+
+---
+
+## Scripts
+
+- `npm run dev` — start dev server
+- `npm run build` — build for production
+- `npm run start` — run production build
+- `npm run lint` — lint
+
+---
+
+## Notes
+
+- Firebase Admin requires correct handling of `FIREBASE_PRIVATE_KEY` line breaks (`.replace(/\n/g, '\n')` in `lib/firebase/admin.ts`).
+- If Vapi workflow variables differ, update the payload in `components/Agent.tsx` accordingly.
+
